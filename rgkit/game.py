@@ -28,6 +28,7 @@ class Player:
         else:
             raise Exception('you need to provide code or a module')
         self._cache = {}
+        self._id_inc = 0
 
     def get_obj(self, class_name):
         if self._robots is not None:
@@ -46,11 +47,17 @@ class Player:
         self._cache[class_name] = getattr(mod, class_name)()
         return self._cache[class_name]
 
+    def get_robot_id(self):
+        ret = self._id_inc
+        self._id_inc += 1
+        return ret
+
 class InternalRobot:
-    def __init__(self, location, hp, player_id, field, robot_type):
+    def __init__(self, location, hp, player_id, robot_id, field, robot_type):
         self.location = location
         self.hp = hp
         self.player_id = player_id
+        self.robot_id = robot_id
         self.field = field
         self.robot_type = robot_type
 
@@ -259,8 +266,8 @@ class Game:
     def spawn_robot(self, player_id, loc, robot_type):
         if self.robot_at_loc(loc) is not None:
             return False
-
-        robot = InternalRobot(loc, settings.robot_hp, player_id, self._field, robot_type)
+        robot_id = self._players[player_id].get_robot_id()
+        robot = InternalRobot(loc, settings.robot_hp, player_id, robot_id, self._field, robot_type)
         self._robots.append(robot)
         self._field[loc] = robot
 
